@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>九九クエスト 5〜9のだん</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:rgba(0,0,0,0)}
+html,body{margin:0;padding:0;background:#111827;color:#f8fafc;font-family:Arial,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+.wrap{max-width:680px;margin:0 auto;padding:8px}
+.panel{background:#1f2937;border:3px solid #475569;border-radius:14px;padding:10px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+.title{text-align:center;font-size:27px;font-weight:bold;margin:2px 0}
+.sub{text-align:center;font-size:14px;color:#cbd5e1;font-weight:bold;line-height:1.5}
+.status{display:table;width:100%;table-layout:fixed;border-spacing:5px;margin-top:7px}
+.sbox{display:table-cell;background:#334155;border-radius:8px;padding:7px;text-align:center;font-size:12px;font-weight:bold}
+.snum{display:block;color:#fde68a;font-size:19px;margin-top:2px}
+.battle{margin-top:8px;background:#0b1220;border:3px solid #334155;border-radius:10px;padding:7px}
+.scene{position:relative;height:245px;background:#172033;border-radius:8px;overflow:hidden;border:2px solid #475569}
+.scene:before{content:"";position:absolute;left:0;right:0;bottom:0;height:72px;background:#2f3e2f}
+.scene:after{content:"";position:absolute;left:0;right:0;bottom:70px;height:4px;background:#516b51}
+.enemyName{position:absolute;top:7px;left:8px;right:8px;text-align:center;font-size:18px;font-weight:bold;color:#fff}
+#enemyCanvas{position:absolute;left:50%;top:45px;margin-left:-85px;width:170px;height:140px;image-rendering:pixelated}
+.hpRow{position:absolute;left:10px;right:10px;bottom:14px;height:28px;background:#111827;border:2px solid #64748b;border-radius:7px;padding:3px}
+.hpBar{height:100%;background:#22c55e;border-radius:3px}
+.hpText{position:absolute;left:0;right:0;top:2px;text-align:center;font-size:14px;font-weight:bold;text-shadow:0 1px 2px #000}
+.questionBox{margin-top:8px;background:#fef3c7;color:#3f2d12;border:3px solid #d6b85f;border-radius:10px;padding:10px;text-align:center}
+.question{font-size:39px;font-weight:bold;letter-spacing:2px}
+.timeWrap{height:15px;background:#e5e7eb;border-radius:8px;overflow:hidden;margin-top:7px;border:1px solid #9ca3af}
+.timeBar{height:100%;width:100%;background:#3b82f6}
+.speedText{font-size:13px;font-weight:bold;margin-top:4px}
+.answers{display:table;width:100%;table-layout:fixed;border-spacing:6px;margin-top:8px}
+.answerCell{display:table-cell}
+.answer{width:100%;border:0;border-radius:10px;padding:15px 4px;background:#2563eb;color:#fff;font-size:28px;font-weight:bold;box-shadow:0 4px 0 #173f86}
+.answer:active{position:relative;top:2px;box-shadow:0 2px 0 #173f86}
+.msg{min-height:58px;background:#273549;border:2px solid #475569;border-radius:9px;margin-top:8px;padding:8px;text-align:center;font-size:16px;font-weight:bold;line-height:1.45}
+.player{margin-top:8px;background:#334155;border-radius:9px;padding:8px}
+.playerRow{display:table;width:100%;table-layout:fixed}
+.playerName,.playerHpText{display:table-cell;font-weight:bold}
+.playerHpText{text-align:right}
+.playerHpWrap{height:16px;background:#111827;border-radius:8px;overflow:hidden;margin-top:5px}
+.playerHp{height:100%;background:#38bdf8;width:100%}
+.map{display:table;width:100%;table-layout:fixed;border-spacing:3px;margin-top:8px}
+.mcell{display:table-cell;height:28px;background:#475569;border-radius:5px;text-align:center;vertical-align:middle;font-size:10px;font-weight:bold}
+.mcell.done{background:#d1a82f;color:#1f2937}.mcell.now{background:#38bdf8;color:#082f49}.mcell.boss{background:#7c3aed;color:#fff}
+.actions{display:table;width:100%;table-layout:fixed;border-spacing:6px;margin-top:7px}
+.acell{display:table-cell}
+.small{width:100%;border:0;border-radius:8px;padding:9px 4px;background:#64748b;color:#fff;font-size:13px;font-weight:bold}
+#bgm.on{background:#3f8058}
+.overlay{display:none;position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(15,23,42,.96);z-index:100}
+.obox{position:absolute;left:7%;top:16%;width:86%;max-width:430px;background:#1f2937;border:3px solid #64748b;border-radius:14px;padding:18px;text-align:center}
+.big{font-size:70px}.obox h2{font-size:27px;margin:5px}.obox p{font-size:18px;line-height:1.6;font-weight:bold}
+.primary{width:100%;border:0;border-radius:10px;padding:13px;background:#2563eb;color:#fff;font-size:18px;font-weight:bold;margin-top:7px}
+#fx{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;z-index:90}
+.spark{position:absolute;width:8px;height:12px}
+.damage{position:fixed;z-index:95;font-size:32px;font-weight:bold;color:#fde047;text-shadow:2px 2px 0 #7c2d12;pointer-events:none}
+@media(max-width:430px){
+ .scene{height:225px}.question{font-size:34px}.answer{font-size:24px;padding:13px 2px}.wrap{padding:5px}.title{font-size:23px}
+ #enemyCanvas{top:40px;width:150px;height:125px;margin-left:-75px}
+}
+</style>
+</head>
+<body>
+<div id="fx"></div>
+<div class="wrap"><div class="panel">
+<div class="title">⚔️ 九九クエスト</div>
+<div class="sub">5・6・7・8・9のだんを すばやく こたえて、モンスターを たおそう！</div>
+
+<div class="status">
+ <div class="sbox">ステージ<span id="stageNo" class="snum">1/20</span></div>
+ <div class="sbox">スコア<span id="score" class="snum">0</span></div>
+ <div class="sbox">れんぞく<span id="combo" class="snum">0</span></div>
+</div>
+
+<div class="battle">
+ <div class="scene">
+   <div id="enemyName" class="enemyName"></div>
+   <canvas id="enemyCanvas" width="85" height="70"></canvas>
+   <div class="hpRow"><div id="hpBar" class="hpBar"></div><div id="hpText" class="hpText"></div></div>
+ </div>
+
+ <div class="questionBox">
+   <div id="question" class="question">7 × 8 = ?</div>
+   <div class="timeWrap"><div id="timeBar" class="timeBar"></div></div>
+   <div id="speedText" class="speedText">はやく こたえると ダメージアップ！</div>
+ </div>
+
+ <div id="answers" class="answers"></div>
+ <div id="msg" class="msg">せいかいを えらんで こうげき！</div>
+
+ <div class="player">
+   <div class="playerRow"><div class="playerName">🧙 ゆうしゃ</div><div id="playerHpText" class="playerHpText">HP 100 / 100</div></div>
+   <div class="playerHpWrap"><div id="playerHp" class="playerHp"></div></div>
+ </div>
+</div>
+
+<div id="map" class="map"></div>
+
+<div class="actions">
+ <div class="acell"><button id="restart" class="small">🔄 はじめから</button></div>
+ <div class="acell"><button id="sound" class="small">🔊 SE ON</button></div>
+ <div class="acell"><button id="bgm" class="small">🎵 BGM OFF</button></div>
+</div>
+</div></div>
+
+<div id="stageClear" class="overlay"><div class="obox"><div class="big">✨⚔️</div><h2>モンスターを たおした！</h2><p id="stageText"></p><button id="nextStage" class="primary">つぎの ステージへ</button></div></div>
+<div id="gameOver" class="overlay"><div class="obox"><div class="big">💫</div><h2>ゆうしゃが たおれた！</h2><p>九九を れんしゅうして、もういちど ちょうせん！</p><button id="retryStage" class="primary">このステージを やりなおす</button></div></div>
+<div id="allClear" class="overlay"><div class="obox"><div class="big">🏆👑</div><h2>まおうを たおした！</h2><p>5〜9のだんの モンスターを ぜんぶ たおした！<br>九九クエスト クリア！</p><button id="again" class="primary">もういちど</button></div></div>
+
+<script>
+(function(){
+"use strict";
+var ENEMIES=[{"name": "ぷるぷるスライム", "hp": 45, "type": "slime"}, {"name": "もりのキノコ", "hp": 50, "type": "mushroom"}, {"name": "ちびゴースト", "hp": 55, "type": "ghost"}, {"name": "つのバット", "hp": 60, "type": "bat"}, {"name": "スライムキング", "hp": 100, "type": "slime"}, {"name": "いわゴーレム", "hp": 70, "type": "golem"}, {"name": "どくキノコ", "hp": 75, "type": "mushroom"}, {"name": "ミニドラゴン", "hp": 80, "type": "dragon"}, {"name": "よるゴースト", "hp": 85, "type": "ghost"}, {"name": "オークたいちょう", "hp": 135, "type": "orc"}, {"name": "アイススライム", "hp": 90, "type": "slime"}, {"name": "ファイアバット", "hp": 95, "type": "bat"}, {"name": "アーマーゴーレム", "hp": 100, "type": "golem"}, {"name": "まほうキノコ", "hp": 105, "type": "mushroom"}, {"name": "ドラゴンナイト", "hp": 165, "type": "dragon"}, {"name": "ダークスライム", "hp": 115, "type": "slime"}, {"name": "シャドウオーク", "hp": 120, "type": "orc"}, {"name": "サンダーゴーレム", "hp": 130, "type": "golem"}, {"name": "ブラックドラゴン", "hp": 140, "type": "dragon"}, {"name": "まおうスライム", "hp": 220, "type": "slime"}];
+var STORAGE="kuku_rpg_5to9_oldipad_v1";
+var stage=0,enemyHp=0,enemyMaxHp=0,playerHp=100,score=0,combo=0;
+var a=5,b=1,correct=5,questionStart=0,timer=null,answerLocked=false;
+var soundOn=true,audioCtx=null,bgmOn=false,bgmTimer=null,bgmStep=0;
+
+function $(id){return document.getElementById(id)}
+function fmt(n){return String(n)}
+function load(){
+ try{var s=JSON.parse(localStorage.getItem(STORAGE)||"null");if(s){if(typeof s.stage==="number")stage=s.stage;if(typeof s.score==="number")score=s.score}}catch(e){}
+ if(stage<0||stage>=ENEMIES.length)stage=0;
+}
+function save(){try{localStorage.setItem(STORAGE,JSON.stringify({stage:stage,score:score}))}catch(e){}}
+function renderMap(){
+ var html="",i,cl;
+ for(i=0;i<ENEMIES.length;i++){cl="mcell ";if(i<stage)cl+="done ";if(i===stage)cl+="now ";if(i===4||i===9||i===14||i===19)cl+="boss ";html+='<div class="'+cl+'">'+(i+1)+'</div>'}
+ $("map").innerHTML=html;
+}
+function render(){
+ var pct=Math.max(0,Math.round(enemyHp/enemyMaxHp*100)),pp=Math.max(0,playerHp);
+ $("stageNo").innerHTML=(stage+1)+"/20";$("score").innerHTML=fmt(score);$("combo").innerHTML=fmt(combo);
+ $("enemyName").innerHTML=(stage===19?"👑 ":"")+ENEMIES[stage].name;
+ $("hpBar").style.width=pct+"%";$("hpBar").style.background=pct>50?"#22c55e":(pct>25?"#eab308":"#ef4444");
+ $("hpText").innerHTML="HP "+Math.max(0,enemyHp)+" / "+enemyMaxHp;
+ $("playerHp").style.width=pp+"%";$("playerHpText").innerHTML="HP "+pp+" / 100";
+ renderMap();drawEnemy();
+ $("bgm").innerHTML=bgmOn?"🎵 BGM ON":"🎵 BGM OFF";$("bgm").className=bgmOn?"small on":"small";
+ $("sound").innerHTML=soundOn?"🔊 SE ON":"🔇 SE OFF";
+}
+function startStage(i){
+ stage=i;enemyMaxHp=ENEMIES[i].hp;enemyHp=enemyMaxHp;playerHp=100;combo=0;
+ $("stageClear").style.display="none";$("gameOver").style.display="none";
+ render();newQuestion();save();
+}
+function newQuestion(){
+ answerLocked=false;
+ a=5+Math.floor(Math.random()*5); /* 5-9 */
+ b=1+Math.floor(Math.random()*9);
+ correct=a*b;
+ $("question").innerHTML=a+" × "+b+" = ?";
+ $("msg").innerHTML="せいかいを えらんで こうげき！";
+ makeChoices();
+ questionStart=(new Date()).getTime();
+ if(timer)clearInterval(timer);
+ timer=setInterval(updateTimer,80);
+ updateTimer();
+}
+function makeChoices(){
+ var vals=[correct],v,i,j,t;
+ while(vals.length<4){
+  var delta=(Math.floor(Math.random()*7)-3);
+  if(delta===0)delta=4;
+  v=correct+delta;
+  if(v<5)v=correct+5;
+  if(vals.indexOf(v)<0)vals.push(v);
+ }
+ for(i=vals.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));t=vals[i];vals[i]=vals[j];vals[j]=t}
+ var html="";
+ for(i=0;i<4;i++)html+='<div class="answerCell"><button class="answer" data-v="'+vals[i]+'">'+vals[i]+'</button></div>';
+ $("answers").innerHTML=html;
+ var bs=document.getElementsByClassName("answer");
+ for(i=0;i<bs.length;i++){(function(btn){btn.onclick=function(){choose(parseInt(btn.getAttribute("data-v"),10),btn)}})(bs[i])}
+}
+function updateTimer(){
+ var elapsed=((new Date()).getTime()-questionStart)/1000;
+ var pct=Math.max(0,100-elapsed*12.5); /* empty in 8 sec */
+ $("timeBar").style.width=pct+"%";
+ $("timeBar").style.background=elapsed<2?"#22c55e":(elapsed<4?"#eab308":(elapsed<6?"#f97316":"#ef4444"));
+ if(elapsed<2)$("speedText").innerHTML="⚡ スーパーヒット チャンス！";
+ else if(elapsed<4)$("speedText").innerHTML="💥 まだまだ つよい こうげき！";
+ else if(elapsed<6)$("speedText").innerHTML="⚔️ ふつうの こうげき";
+ else $("speedText").innerHTML="🐢 いそいで こたえよう！";
+}
+function damageFor(sec){
+ if(sec<2)return 30;
+ if(sec<4)return 22;
+ if(sec<6)return 16;
+ return 10;
+}
+function choose(v,btn){
+ if(answerLocked)return;answerLocked=true;if(timer)clearInterval(timer);
+ var sec=((new Date()).getTime()-questionStart)/1000,bs=document.getElementsByClassName("answer"),i;
+ for(i=0;i<bs.length;i++)bs[i].disabled=true;
+ if(v===correct){
+  var dmg=damageFor(sec)+Math.min(10,combo*2);combo++;enemyHp-=dmg;score+=dmg*10;
+  btn.style.background="#16a34a";$("msg").innerHTML="⭕ せいかい！ "+sec.toFixed(1)+"びょう！<br>💥 "+dmg+" ダメージ！";
+  showDamage("-"+dmg,true);hitFlash();playHit(dmg);render();
+  if(enemyHp<=0){setTimeout(stageClear,700)}else setTimeout(newQuestion,800);
+ }else{
+  combo=0;playerHp-=18;btn.style.background="#dc2626";
+  $("msg").innerHTML="✖ ざんねん！ こたえは "+correct+"<br>モンスターの こうげき！ -18 HP";
+  showDamage("-18",false);playMiss();render();
+  if(playerHp<=0)setTimeout(function(){$("gameOver").style.display="block"},700);
+  else setTimeout(newQuestion,1100);
+ }
+}
+function stageClear(){
+ fireworks(stage===19?180:75);playWin();
+ $("stageText").innerHTML=ENEMIES[stage].name+"を げきは！<br>スコア "+score;
+ $("stageClear").style.display="block";
+}
+function nextStage(){
+ $("stageClear").style.display="none";
+ if(stage>=ENEMIES.length-1){$("allClear").style.display="block";fireworks(220);return}
+ stage++;startStage(stage);
+}
+function showDamage(txt,enemy){
+ var d=document.createElement("div"),r=enemy?$("enemyCanvas").getBoundingClientRect():$("playerHp").getBoundingClientRect();
+ d.className="damage";d.innerHTML=txt;d.style.left=(r.left+r.width/2-28)+"px";d.style.top=(r.top+r.height/2-18)+"px";document.body.appendChild(d);
+ var born=(new Date()).getTime(),startTop=parseInt(d.style.top,10);
+ var tm=setInterval(function(){var t=((new Date()).getTime()-born)/650;if(t>=1){clearInterval(tm);if(d.parentNode)d.parentNode.removeChild(d);return}d.style.top=(startTop-45*t)+"px";d.style.opacity=String(1-t)},30);
+}
+function hitFlash(){
+ var c=$("enemyCanvas");c.style.opacity=".25";setTimeout(function(){c.style.opacity="1"},100);setTimeout(function(){c.style.opacity=".35"},180);setTimeout(function(){c.style.opacity="1"},260);
+}
+
+/* pixel art */
+function px(ctx,x,y,w,h,col){ctx.fillStyle=col;ctx.fillRect(x,y,w,h)}
+function drawEnemy(){
+ var c=$("enemyCanvas"),ctx=c.getContext("2d"),type=ENEMIES[stage].type,boss=(stage===4||stage===9||stage===14||stage===19),dark=stage>=15;
+ ctx.clearRect(0,0,c.width,c.height);ctx.imageSmoothingEnabled=false;
+ var S=boss?1.15:1,ox=boss?-5:0,oy=boss?-3:0;
+ ctx.save();ctx.translate(ox,oy);ctx.scale(S,S);
+ if(type==="slime")drawSlime(ctx,dark,stage===19);
+ else if(type==="mushroom")drawMushroom(ctx,dark);
+ else if(type==="ghost")drawGhost(ctx,dark);
+ else if(type==="bat")drawBat(ctx,dark);
+ else if(type==="golem")drawGolem(ctx,dark);
+ else if(type==="dragon")drawDragon(ctx,dark);
+ else drawOrc(ctx,dark);
+ ctx.restore();
+}
+function drawSlime(c,dark,boss){
+ var body=boss?"#7c3aed":(dark?"#475569":"#22c55e"),edge=boss?"#4c1d95":"#14532d";
+ px(c,20,28,45,25,edge);px(c,15,35,55,14,edge);px(c,25,20,35,36,edge);
+ px(c,21,29,43,23,body);px(c,17,36,51,11,body);px(c,26,22,33,31,body);
+ px(c,29,34,6,6,"#fff");px(c,51,34,6,6,"#fff");px(c,31,36,3,3,"#111");px(c,53,36,3,3,"#111");
+ if(boss){px(c,24,14,37,5,"#facc15");px(c,28,9,5,8,"#facc15");px(c,52,9,5,8,"#facc15");px(c,40,6,5,10,"#facc15")}
+}
+function drawMushroom(c,dark){
+ var cap=dark?"#7c2d12":"#dc2626",stem="#f5deb3";
+ px(c,20,20,45,9,cap);px(c,14,29,57,17,cap);px(c,23,46,39,7,cap);px(c,31,53,23,14,stem);
+ px(c,25,26,7,6,"#fff");px(c,53,31,8,6,"#fff");px(c,36,55,4,4,"#111");px(c,46,55,4,4,"#111");
+}
+function drawGhost(c,dark){
+ var body=dark?"#a78bfa":"#e2e8f0";
+ px(c,24,18,38,42,body);px(c,18,27,50,29,body);px(c,18,55,10,8,body);px(c,36,55,10,8,body);px(c,58,55,10,8,body);
+ px(c,29,33,7,8,"#111");px(c,51,33,7,8,"#111");px(c,39,47,9,4,"#64748b");
+}
+function drawBat(c,dark){
+ var wing=dark?"#312e81":"#5b21b6",body="#1f2937";
+ px(c,8,25,20,8,wing);px(c,3,18,10,8,wing);px(c,12,33,18,9,wing);
+ px(c,57,25,20,8,wing);px(c,72,18,10,8,wing);px(c,55,33,18,9,wing);
+ px(c,31,24,23,27,body);px(c,35,18,6,8,body);px(c,47,18,6,8,body);px(c,36,32,4,4,"#ef4444");px(c,47,32,4,4,"#ef4444");
+}
+function drawGolem(c,dark){
+ var stone=dark?"#4b5563":"#78716c",light=dark?"#6b7280":"#a8a29e";
+ px(c,25,12,35,19,stone);px(c,18,30,49,27,stone);px(c,8,34,12,19,light);px(c,66,34,12,19,light);
+ px(c,22,56,17,12,stone);px(c,47,56,17,12,stone);px(c,31,19,6,5,"#facc15");px(c,49,19,6,5,"#facc15");
+}
+function drawDragon(c,dark){
+ var body=dark?"#7f1d1d":"#16a34a",wing=dark?"#450a0a":"#166534";
+ px(c,27,22,33,33,body);px(c,20,13,18,18,body);px(c,14,7,6,10,body);px(c,31,7,6,10,body);
+ px(c,8,30,20,8,wing);px(c,2,22,10,9,wing);px(c,58,30,19,8,wing);px(c,74,22,9,9,wing);
+ px(c,20,20,5,5,"#fde047");px(c,36,20,5,5,"#fde047");px(c,34,54,8,12,body);px(c,50,54,8,12,body);
+}
+function drawOrc(c,dark){
+ var skin=dark?"#365314":"#65a30d",armor="#475569";
+ px(c,26,13,33,29,skin);px(c,19,23,47,17,skin);px(c,24,41,38,22,armor);px(c,16,44,10,15,skin);px(c,62,44,10,15,skin);
+ px(c,30,23,5,5,"#fef3c7");px(c,51,23,5,5,"#fef3c7");px(c,34,34,18,4,"#3f2d12");px(c,26,9,7,7,"#e5e7eb");px(c,53,9,7,7,"#e5e7eb");
+}
+
+/* audio */
+function getAudio(){if(audioCtx)return audioCtx;var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;try{audioCtx=new AC()}catch(e){audioCtx=null}return audioCtx}
+function unlockAudio(){var a=getAudio();if(!a)return;try{if(a.state==="suspended"&&a.resume)a.resume();var b=a.createBuffer(1,1,22050),s=a.createBufferSource();s.buffer=b;s.connect(a.destination);s.start(0)}catch(e){}}
+function tone(freq,start,dur,vol,type){var a=getAudio(),o,g;if(!a)return;try{o=a.createOscillator();g=a.createGain();o.type=type||"square";o.frequency.value=freq;g.gain.setValueAtTime(vol,start);g.gain.exponentialRampToValueAtTime(.0001,start+dur);o.connect(g);g.connect(a.destination);o.start(start);o.stop(start+dur+.02)}catch(e){}}
+function playHit(d){if(!soundOn)return;var au=getAudio();if(!au)return;tone(d>=30?880:650,au.currentTime+.01,.1,.055,"square");tone(d>=30?1320:900,au.currentTime+.10,.1,.04,"square")}
+function playMiss(){if(!soundOn)return;var au=getAudio();if(au)tone(140,au.currentTime+.01,.18,.055,"sawtooth")}
+function playWin(){if(!soundOn)return;var au=getAudio(),N=[523,659,784,1046],i;if(!au)return;for(i=0;i<N.length;i++)tone(N[i],au.currentTime+i*.1,.18,.055,"square")}
+function bgmTick(){
+ var au=getAudio(),m,b,now;if(!au||!bgmOn)return;
+ if(stage===19){m=[164.81,196,220,164.81,246.94,220,196,146.83];b=[82.41,82.41,73.42,73.42]}
+ else{m=[261.63,329.63,392,329.63,293.66,349.23,440,349.23,261.63,329.63,392,523.25,440,392,329.63,293.66];b=[130.81,130.81,146.83,146.83,164.81,164.81,146.83,146.83]}
+ now=au.currentTime+.03;tone(m[bgmStep%m.length],now,.18,.018,"square");
+ if(bgmStep%2===0)tone(b[Math.floor(bgmStep/2)%b.length],now,.32,.011,"triangle");bgmStep++;
+}
+function startBgm(){unlockAudio();bgmOn=true;if(bgmTimer)clearInterval(bgmTimer);bgmStep=0;bgmTick();bgmTimer=setInterval(bgmTick,260);render()}
+function stopBgm(){bgmOn=false;if(bgmTimer){clearInterval(bgmTimer);bgmTimer=null}render()}
+function toggleBgm(){if(bgmOn)stopBgm();else startBgm()}
+
+/* fireworks */
+function fireworks(n){var fx=$("fx"),cx=window.innerWidth/2,cy=window.innerHeight*.25,cols=["#f66","#fd4","#5b7","#48e","#a6e"],i,e;
+ for(i=0;i<n;i++){e=document.createElement("div");e.className="spark";e.style.background=cols[i%5];e.style.left=cx+"px";e.style.top=cy+"px";fx.appendChild(e);
+ (function(el,dx,dy,born){var tm=setInterval(function(){var t=((new Date()).getTime()-born)/900;if(t>=1){clearInterval(tm);if(el.parentNode)el.parentNode.removeChild(el);return}el.style.left=(cx+dx*t)+"px";el.style.top=(cy+dy*t)+"px";el.style.opacity=String(1-t)},30)})(e,Math.random()*600-300,80+Math.random()*400,(new Date()).getTime())}
+}
+
+$("nextStage").onclick=nextStage;
+$("retryStage").onclick=function(){$("gameOver").style.display="none";startStage(stage)};
+$("again").onclick=function(){stage=0;score=0;$("allClear").style.display="none";startStage(0)};
+$("restart").onclick=function(){unlockAudio();if(confirm("さいしょから やりなおしますか？")){stage=0;score=0;startStage(0)}};
+$("sound").onclick=function(){unlockAudio();soundOn=!soundOn;render()};
+$("bgm").onclick=function(){unlockAudio();toggleBgm()};
+
+load();startStage(stage);
+})();
+</script>
+</body>
+</html>
